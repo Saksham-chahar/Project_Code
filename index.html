@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="index_css.css" >
+</head>
+
+<body>
+    <div class="platform-logo">MAP my CAMPUS</div>
+    <div class="content-panel">
+
+<!-- Sign Up  -->
+        <div class="sign-up">
+            <div class="sign-heading">Sign Up</div>
+
+            <form id="signup-form" class="form-wrapper">
+
+                <div class="input-group">
+                    <label for="sign-name" class="input-label">Name</label>
+                    <input type="text" id="sign-name" class="input-field" name="name" placeholder="Enter your full name"
+                        required>
+                </div>
+
+                <div class="input-group">
+                    <label for="sign-email" class="input-label">Email</label>
+                    <input type="email" id="sign-email" class="input-field" name="email" placeholder="Enter your email"
+                        required>
+                </div>
+
+                <div class="input-group">
+                    <label for="sign-password" class="input-label">Set Password</label>
+                    <input type="password" id="sign-password" class="input-field" name="password"
+                        placeholder="Create a password" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="sign-confirm-password" class="input-label">Confirm Password</label>
+                    <input type="password" id="sign-confirm-password" class="input-field" name="confirm_password"
+                        placeholder="Confirm your password" required>
+                </div>
+
+                <button type="submit" id="submit-signup-btn" class="btn primary-btn">Sign Up</button>
+
+                <div class="auth-switch">
+                    <span class="auth-switch-text">Already have an account?</span>
+                    <a href="#login" id="link-to-login" class="auth-switch-link">Log In</a>
+                </div>
+
+            </form>
+        </div>
+
+
+<!-- Verify Email -->
+        <div class="verify-email">
+            <div class="verify-heading">Verify Email</div>
+
+            <form id="verify-form" class="form-wrapper">
+
+                <p class="instruction-text">We've sent a one-time password (OTP) to your email. Please enter it below.
+                </p>
+
+                <div class="input-group">
+                    <label for="verify-otp" class="input-label">Enter OTP</label>
+                    <input type="text" id="verify-otp" class="input-field" name="otp" placeholder="Enter 6-digit code"
+                        required pattern="\d{6}" maxlength="6" autocomplete="one-time-code">
+                </div>
+
+                <div class="button-group">
+                    <button type="button" id="prev-btn" class="btn secondary-btn">Previous</button>
+
+                    <button type="submit" id="submit-verify-btn" class="btn primary-btn">Verify</button>
+                </div>
+
+            </form>
+        </div>
+
+
+<!-- log-in -->
+        <div class="log-in">
+            <div class="log-heading">Log In</div>
+
+            <form id="login-form" class="form-wrapper">
+
+                <div class="input-group">
+                    <label for="login-email" class="input-label">Email</label>
+                    <input type="email" id="login-email" class="input-field" name="email" placeholder="Enter your email"
+                        required>
+                </div>
+
+                <div class="input-group">
+                    <label for="login-password" class="input-label">Password</label>
+                    <input type="password" id="login-password" class="input-field" name="password"
+                        placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" id="submit-login-btn" class="btn primary-btn">Log In</button>
+
+                <div class="auth-switch">
+                    <span class="auth-switch-text">Don't have an account?</span>
+                    <a href="#signup" id="link-to-signup" class="auth-switch-link">Sign Up</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script  src="index_js.js">
+    </script>
+</body>
+
+</html>
