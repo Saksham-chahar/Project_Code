@@ -24,15 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const topRow = document.getElementById('header-top-row');
   const horizontalBuilderWrapper = document.querySelector('.horizontal-builder-wrapper');
 
-  // Peek Mode Toggle logic
-  function togglePeekMode(e) {
-    // Prevent toggle if the user clicks a tab or functional button
+  // Peek Mode and Panel Click logic
+  function handlePanelClick(e) {
+    // Prevent action if the user clicks a tab or functional button
     if (e.target.closest('button')) return;
-    horizontalBuilderWrapper.classList.toggle('peek-mode');
+    
+    // If user clicks the panel while it's in peek mode, make it fully visible
+    if (horizontalBuilderWrapper.classList.contains('peek-mode')) {
+      horizontalBuilderWrapper.classList.remove('peek-mode');
+      // Restore visually selected state to the active button
+      if (currentMode === 'schedule') toggleSchedule.checked = true;
+      if (currentMode === 'events') toggleEvents.checked = true;
+    }
   }
 
-  bsHeader.addEventListener('click', togglePeekMode);
-  topRow.addEventListener('click', togglePeekMode);
+  bsHeader.addEventListener('click', handlePanelClick);
+  topRow.addEventListener('click', handlePanelClick);
 
   function startEditing() {
     isEditMode = true;
@@ -45,18 +52,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleSchedule = document.getElementById('toggle-schedule');
   const toggleEvents = document.getElementById('toggle-events');
 
-  toggleSchedule.addEventListener('change', () => {
-    currentMode = 'schedule';
-    isEditMode = false;
-    setupTabs();
-    renderTrack();
+  toggleSchedule.addEventListener('click', (e) => {
+    if (currentMode === 'schedule' && !horizontalBuilderWrapper.classList.contains('peek-mode')) {
+      // Toggle to peek mode and visually unselect
+      horizontalBuilderWrapper.classList.add('peek-mode');
+      setTimeout(() => toggleSchedule.checked = false, 0); 
+    } else {
+      // Select schedule and open 100%
+      currentMode = 'schedule';
+      isEditMode = false;
+      horizontalBuilderWrapper.classList.remove('peek-mode');
+      toggleSchedule.checked = true; // Ensure it's visually selected
+      setupTabs();
+      renderTrack();
+    }
   });
 
-  toggleEvents.addEventListener('change', () => {
-    currentMode = 'events';
-    isEditMode = false;
-    setupTabs();
-    renderTrack();
+  toggleEvents.addEventListener('click', (e) => {
+    if (currentMode === 'events' && !horizontalBuilderWrapper.classList.contains('peek-mode')) {
+      // Toggle to peek mode and visually unselect
+      horizontalBuilderWrapper.classList.add('peek-mode');
+      setTimeout(() => toggleEvents.checked = false, 0); 
+    } else {
+      // Select events and open 100%
+      currentMode = 'events';
+      isEditMode = false;
+      horizontalBuilderWrapper.classList.remove('peek-mode');
+      toggleEvents.checked = true; // Ensure it's visually selected
+      setupTabs();
+      renderTrack();
+    }
   });
 
   setupTabs();
@@ -94,14 +119,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. RENDER LOGIC (Draws the cards based on state)
   function renderTrack() {
     track.innerHTML = ''; // Clear track
+    
+    const addActionBtn = document.querySelector('.add-action-btn');
+    if (addActionBtn) {
+       addActionBtn.style.display = currentMode === 'events' ? 'flex' : 'none';
+    }
+    
     const masterData = currentMode === 'schedule' ? weekData : eventData;
     const dataObj = isEditMode ? draftData : masterData;
     const todayClasses = dataObj[currentDay];
 
     const hasAnySchedule = Object.values(masterData).some(arr => arr.length > 0);
 
-    // Empty vs Exists global view state
-    if (!hasAnySchedule && !isEditMode) {
+    // Empty vs Exists global view state - ONLY for schedule
+    if (currentMode === 'schedule' && !hasAnySchedule && !isEditMode) {
       bsHeader.style.display = 'none';
       topRow.style.display = 'none';
       track.style.display = 'none';
@@ -115,29 +146,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Header buttons state
-    if (isEditMode) {
+    if (currentMode === 'events') {
       editBtn.style.display = 'none';
-      exitEditBtn.style.display = 'flex';
-      saveBtn.style.display = 'block';
-    } else {
-      editBtn.style.display = 'flex';
       exitEditBtn.style.display = 'none';
       saveBtn.style.display = 'none';
+    } else {
+      if (isEditMode) {
+        editBtn.style.display = 'none';
+        exitEditBtn.style.display = 'flex';
+        saveBtn.style.display = 'block';
+      } else {
+        editBtn.style.display = 'flex';
+        exitEditBtn.style.display = 'none';
+        saveBtn.style.display = 'none';
+      }
     }
 
-    if (isEditMode) {
-      // --- EDIT MODE: Draw Input Cards ---
-      if (todayClasses) {
-        todayClasses.forEach((cls, index) => track.appendChild(createEditCard(cls, index)));
-      }
-      track.appendChild(createAddButtonCard());
+    if (currentMode === 'events') {
+       // --- EVENTS MODE ---
+       if (!todayClasses || todayClasses.length === 0) {
+         track.innerHTML = `<p style="color:#94a3b8; padding: 20px;">No events for ${currentDay}.</p>`;
+       } else {
+         todayClasses.forEach((evt, index) => track.appendChild(createEventViewCard(evt, index)));
+       }
     } else {
-      // --- VIEW MODE: Draw Selectable Text Cards ---
-      if (!todayClasses || todayClasses.length === 0) {
-        track.innerHTML = `<p style="color:#94a3b8; padding: 20px;">No items for ${currentDay}.</p>`;
-      } else {
-        todayClasses.forEach((cls, index) => track.appendChild(createViewCard(cls, index)));
-      }
+       // --- SCHEDULE MODE ---
+       if (isEditMode) {
+         // --- EDIT MODE: Draw Input Cards ---
+         if (todayClasses) {
+           todayClasses.forEach((cls, index) => track.appendChild(createEditCard(cls, index)));
+         }
+         track.appendChild(createAddButtonCard());
+       } else {
+         // --- VIEW MODE: Draw Selectable Text Cards ---
+         if (!todayClasses || todayClasses.length === 0) {
+           track.innerHTML = `<p style="color:#94a3b8; padding: 20px;">No items for ${currentDay}.</p>`;
+         } else {
+           todayClasses.forEach((cls, index) => track.appendChild(createViewCard(cls, index)));
+         }
+       }
     }
   }
 
@@ -193,6 +240,44 @@ document.addEventListener('DOMContentLoaded', () => {
       card.classList.add('selected');
       // Trigger your map navigation here!
       console.log("Navigate to:", data.location); 
+    });
+    return card;
+  }
+
+  function createEventViewCard(data, index) {
+    const card = document.createElement('div');
+    card.className = 'class-frame view-mode'; 
+    card.style.minWidth = '250px';
+    card.innerHTML = `
+      <div class="frame-body" style="gap: 5px;">
+        <span class="view-text" style="white-space: pre-wrap; font-size: 1rem;">${data.text}</span>
+        <span class="view-time" style="margin-top: 10px; color: var(--primary-color); font-weight: bold;">- ${data.author || 'User'}</span>
+      </div>
+    `;
+    return card;
+  }
+
+  function createEventInputCard() {
+    const card = document.createElement('div');
+    card.className = 'class-frame';
+    card.style.minWidth = '250px';
+    card.innerHTML = `
+      <div class="frame-body">
+        <textarea class="frame-input event-text-val" placeholder="What's happening?" rows="3" style="resize: none; font-family: inherit; margin-bottom: 10px;"></textarea>
+        <button class="save-schedule-btn post-event-btn" style="width: 100%;">Post Event</button>
+      </div>
+    `;
+
+    card.querySelector('.post-event-btn').addEventListener('click', () => {
+      const text = card.querySelector('.event-text-val').value.trim();
+      if (text) {
+         if (!eventData[currentDay]) eventData[currentDay] = [];
+         eventData[currentDay].push({ text: text, author: 'Current User' });
+         renderTrack();
+      } else {
+         card.remove();
+         renderTrack(); // refresh if it was empty track before
+      }
     });
     return card;
   }
@@ -279,6 +364,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (addActionBtn) {
     addActionBtn.addEventListener('click', () => {
+        if (currentMode === 'events') {
+           // Provide an input card for events if one doesn't exist already
+           const existingInput = document.querySelector('.event-text-val');
+           if (existingInput) {
+               existingInput.focus();
+               return;
+           }
+           const inputCard = createEventInputCard();
+           // Remove "No events" text if it's there
+           const p = track.querySelector('p');
+           if (p) p.remove();
+           
+           track.prepend(inputCard);
+           track.scrollLeft = 0;
+           return;
+        }
+
         if (!isEditMode) {
            if (emptyStateWrapper.style.display !== 'none') {
                createBtn.click();
