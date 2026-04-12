@@ -8,7 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const linkToLogin = document.getElementById('link-to-login');
     const linkToSignup = document.getElementById('link-to-signup');
     const signupForm = document.getElementById('signup-form');
+    const verifyForm = document.getElementById('verify-form');
     const prevBtn = document.getElementById('prev-btn');
+
+    // Store email for verification step
+    let savedEmail = '';
 
     // 3. Helper function to swap the active class
     function switchPanel(panelToShow) {
@@ -43,11 +47,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Submit "Sign Up" Form -> Show Verify Email
+    // Submit "Sign Up" Form -> Process Registration
     if (signupForm) {
-        signupForm.addEventListener('submit', (e) => {
+        signupForm.addEventListener('submit', async (e) => {
             e.preventDefault(); // Stop form from refreshing the page
-            switchPanel(verifyPanel);
+            
+            const name = document.getElementById('sign-name').value;
+            const email = document.getElementById('sign-email').value;
+            const password = document.getElementById('sign-password').value;
+            const userType = 'student'; // Set user type based on request
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ full_name: name, email, password, user_type: userType })
+                });
+
+                if (response.ok) {
+                    savedEmail = email; // Store for the verification step
+                    switchPanel(verifyPanel);
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    alert(data.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration Error:', error);
+                alert('Connection error. Please check if the server is running.');
+            }
+        });
+    }
+
+    // Submit "Verify" Form -> Verify OTP and Redirect
+    if (verifyForm) {
+        verifyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const otp = document.getElementById('verify-otp').value;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: savedEmail, otp })
+                });
+
+                if (response.ok) {
+                    // Registration complete, load home page
+                    window.location.href = 'home.html';
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    alert(data.message || 'Verification failed. Please check the OTP.');
+                }
+            } catch (error) {
+                console.error('Verification Error:', error);
+                alert('Connection error. Please try again.');
+            }
         });
     }
 

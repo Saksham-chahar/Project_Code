@@ -12,17 +12,25 @@ app.use(cors());
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+
+const db = require('./db');
+
+
 // 2. Setup MySQL Database Connection
 // We are using a pool for production readiness
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+// const db = mysql.createPool({
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME,
+//   waitForConnections: true,
+//   connectionLimit: 10,
+//   queueLimit: 0
+// });
+
+
+
+
 
 // Test the database connection upon launch
 (async () => {
@@ -136,6 +144,11 @@ app.get('/api/professors', async (req, res) => {
   }
 });
 
+// const authRoutes = require('./routes/auth');
+// app.use('/api/auth', authRoutes);
+// Routes
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
