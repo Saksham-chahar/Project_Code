@@ -19,6 +19,8 @@
   --slow-bg-gradient-color2: #c7d2fe;
   --slow-bg-gradient-color3: #bae6fd;
   --main-desktop-column-width: 440px;
+  --desktop-edge-fade: 2%;
+  --desktop-column-width: 80vw;
 }
 
 html, body {
@@ -28,15 +30,7 @@ html, body {
   height: 100dvh;
   overflow: hidden;
   position: fixed;
-  background: linear-gradient(270deg, var(--slow-bg-gradient-color1), var(--slow-bg-gradient-color2), var(--slow-bg-gradient-color3));
-  background-size: 400% 400%;
-  animation: animateGlobalBackgroundGradient 25s ease infinite;
-}
-
-@keyframes animateGlobalBackgroundGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  background-color: transparent;
 }
 
 #main-application-column {
@@ -57,13 +51,18 @@ html, body {
   position: absolute; /* Keeps it strictly in the background */
   top: 0;
   left: 0;
-  z-index: -2; 
+  z-index: 10; /* Fixed: Lifted from -2 to 10 so it isn't blocked by the body */
 }
 
-.map-placeholder-text {
-  color: #a3a3a3;
-  font-weight: bold;
-  font-size: 1.2rem;
+/* --- Ola Map Background Container --- */
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 11; /* Ensure map is active above container */
+  background-color: transparent; /* Seamless blend */
 }
 
 /* --- Layer 1: Top Navigation Container --- */
@@ -78,11 +77,11 @@ html, body {
 
 /* Logo Styling */
 .app-logo {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
   display: inline;
   color: var(--primary-color);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   text-shadow: 1px 1px 2px rgba(255,255,255,0.8); /* Helps text stand out over complex map areas */
 }
 
@@ -229,8 +228,9 @@ html, body {
   justify-content: space-between;
   align-items: flex-end;
   padding: 15px 20px;
+  pointer-events: none; /* Let clicks pass through empty spaces between fabs */
 }
-.left-fabs, .right-fabs { display: flex; flex-direction: column; gap: 10px; }
+.left-fabs, .right-fabs { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
 
 .fab-btn {
   width: 50px; height: 50px;
@@ -281,10 +281,15 @@ html, body {
   padding: 15px 15px;
   width: 100%;
   transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none; /* Add this! */
 }
 
 .horizontal-builder-wrapper.peek-mode {
   transform: translateY(25%);
+}
+
+.header-top-row {
+  pointer-events: auto; /* Keep header buttons clickable */
 }
 
 .main-card-container {
@@ -293,18 +298,25 @@ html, body {
   box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
   padding: 15px 15px;
   width: 100%;
+  pointer-events: auto; /* keep the panel clickable */
 }
 
 /* @media for desktop tweaks */
 @media (min-width: 769px) {
   #main-application-column {
-    width: 82vw;
+    width: var(--desktop-column-width);
     max-width: 1400px;
     height: 100dvh;
     margin: 0 auto;
-    background-color: var(--bg-white);
-    box-shadow: 0 0 40px rgba(0,0,0,0.15);
+    background-color: transparent;
     border-radius: 0;
+    box-shadow: none;
+  }
+  
+  .map-container {
+    background-color: var(--bg-white);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black var(--desktop-edge-fade), black calc(100% - var(--desktop-edge-fade)), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black var(--desktop-edge-fade), black calc(100% - var(--desktop-edge-fade)), transparent 100%);
   }
 
   .bottom-layer {

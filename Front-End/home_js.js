@@ -358,10 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const addActionBtn = document.querySelector('.add-action-btn');
 
   if (recenterBtn) {
-    recenterBtn.addEventListener('click', () => {
-        console.log("📍 Recentering Map to User's GPS Location...");
-        alert("Recentering Map to User's GPS Location...");
-    });
+    // The click logic is now fully handled in map.js!
   }
 
   if (addActionBtn) {

@@ -10,13 +10,25 @@
 
     <link rel="stylesheet" href="home_style.css">
     <link rel="stylesheet" href="panel.css">
+    <link rel="stylesheet" href="test.css">
+
+    <!-- Ola Maps Web SDK (MapLibre GL based) -->
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://www.unpkg.com/olamaps-web-sdk@latest/dist/olamaps-web-sdk.umd.js"></script>
 </head>
 
 <body>
+    <div class="page-bg"></div>
+    <div class="animation-wrapper">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+    </div>
 
     <div id="main-application-column">
         <div class="map-container">
-            <div class="map-placeholder-text">Google Maps API Goes Here</div>
+            <div id="map"></div>
         </div>
 
         <header class="top-nav-layer">
@@ -173,6 +185,7 @@
 
     <script src="panel.js"></script>
     <script src="home_js.js"></script>
+    <script src="map.js"></script>
 </body>
 
 </html>
