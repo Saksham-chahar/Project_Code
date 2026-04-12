@@ -1,3 +1,5 @@
+const API_BASE_URL = 'http://10.240.167.136:3000'; // Change to live cloud URL when deployed to production (e.g., Vercel)
+
 document.addEventListener('DOMContentLoaded', () => {
   
   // 1. STATE MANAGEMENT (The "Fake Database")
@@ -417,54 +419,73 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 8. MAP FILTERS DROPDOWN LOGIC
-  const filterBtn = document.getElementById('filter-btn');
-  const dropdown = document.getElementById('categories-dropdown');
+    const filterBtn = document.getElementById('filter-btn');
 
-  if (filterBtn && dropdown) {
-    filterBtn.addEventListener('click', async () => {
-      const isOpen = dropdown.classList.toggle('is-open');
-
-      if (isOpen) {
-        await fetchAndRenderCategories();
-      }
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!filterBtn.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.classList.remove('is-open');
+  // Replace your old map filter logic with this clean integration
+  if (filterBtn) {
+    filterBtn.addEventListener('click', (e) => {
+      e.preventDefault(); // Prevent accidental default behavior
+      
+      // Call the globally available panel trigger system 
+      if (typeof window.openPanel === 'function') {
+          window.openPanel('side-panel-categories');
+      } else {
+          console.error("Panel system is not loaded.");
       }
     });
   }
 
-  async function fetchAndRenderCategories() {
-    dropdown.innerHTML = '<div class="loading-text">Loading...</div>';
-    try {
-      const response = await fetch('http://localhost:5000/api/categories');
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      const categories = await response.json();
-      
-      dropdown.innerHTML = ''; // Clear loading text
-      
-      categories.forEach(category => {
-        const item = document.createElement('div');
-        item.className = 'category-item';
-        item.innerHTML = `
-          <i class="fa-solid ${category.icon}"></i>
-          <span>${category.name}</span>
-        `;
+  // const filterBtn = document.getElementById('filter-btn');
+  // const dropdown = document.getElementById('categories-dropdown');
+
+  // if (filterBtn && dropdown) {
+  //   filterBtn.addEventListener('click', async () => {
+  //     const isOpen = dropdown.classList.toggle('is-open');
+
+  //     if (isOpen) {
+  //       await fetchAndRenderCategories();
+  //     }
+  //   });
+
+  //   // Close dropdown when clicking outside
+  //   document.addEventListener('click', (e) => {
+  //     if (!filterBtn.contains(e.target) && !dropdown.contains(e.target)) {
+  //       dropdown.classList.remove('is-open');
+  //     }
+  //   });
+  // }
+
+  // function fetchAndRenderCategories() {
+  //   dropdown.innerHTML = '<div class="loading-text">Loading...</div>';
+    
+  //   return fetch(`${API_BASE_URL}/api/categories`)
+  //     .then(response => {
+  //       if (!response.ok) throw new Error('Server responded but with an error status.');
+  //       return response.json();
+  //     })
+  //     .then(categories => {
+  //       dropdown.innerHTML = ''; // Clear loading text
         
-        item.addEventListener('click', () => {
-          console.log(`Selected Map Filter: ${category.name}`);
-          dropdown.classList.remove('is-open');
-        });
-        
-        dropdown.appendChild(item);
-      });
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      dropdown.innerHTML = '<div class="loading-text">Error loading categories.</div>';
-    }
-  }
+  //       categories.forEach(category => {
+  //         const item = document.createElement('div');
+  //         item.className = 'category-item';
+  //         item.innerHTML = `
+  //           <i class="fa-solid ${category.icon}"></i>
+  //           <span>${category.name}</span>
+  //         `;
+          
+  //         item.addEventListener('click', () => {
+  //           console.log(`Selected Map Filter: ${category.name}`);
+  //           dropdown.classList.remove('is-open');
+  //         });
+          
+  //         dropdown.appendChild(item);
+  //       });
+  //     })
+  //     .catch(error => {
+  //       console.error('Network Warning: The server might be offline or unreachable.', error.message);
+  //       dropdown.innerHTML = '<div class="loading-text">Filters temporarily unavailable (Server offline)</div>';
+  //     });
+  // }
 
 });

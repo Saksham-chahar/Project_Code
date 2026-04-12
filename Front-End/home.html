@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" href="home_style.css">
+    <link rel="stylesheet" href="panel.css">
 </head>
 
 <body>
@@ -111,6 +112,63 @@
         </div>
     </div>
     
+    <!-- Reusable Side Panel Overlay -->
+    <div class="sp-global-overlay" id="sp-global-overlay"></div>
+
+    <!-- Categories Side Panel -->
+    <div class="sp-side-panel" id="side-panel-categories">
+        <div class="sp-panel-header">
+            <h2 class="sp-panel-title">Map Categories</h2>
+            <button class="sp-close-btn" aria-label="Close panel">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="sp-panel-content">
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-regular fa-building"></i></div>
+                <span class="sp-category-name">Buildings</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                <span class="sp-category-name">Professors</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-bed"></i></div>
+                <span class="sp-category-name">Hostels</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-flask"></i></div>
+                <span class="sp-category-name">Labs</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-store"></i></div>
+                <span class="sp-category-name">Markets</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-chalkboard"></i></div>
+                <span class="sp-category-name">Classrooms</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-restroom"></i></div>
+                <span class="sp-category-name">Washrooms</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-building-columns"></i></div>
+                <span class="sp-category-name">Auditoriums</span>
+            </div>
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-briefcase"></i></div>
+                <span class="sp-category-name">Offices</span>
+            </div>
+            
+            <div class="sp-category-card">
+                <div class="sp-category-icon"><i class="fa-solid fa-handshake-angle"></i></div>
+                <span class="sp-category-name">Services</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="panel.js"></script>
     <script src="home_js.js"></script>
 </body>
 
