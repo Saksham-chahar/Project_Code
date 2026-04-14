@@ -15,6 +15,44 @@ document.addEventListener('DOMContentLoaded', () => {
   let isEditMode = false;
   let draftData = {};
 
+  // --- INITIAL LOAD LOGIC ---
+  async function loadTimetable() {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return;
+      const currentUser = JSON.parse(userStr);
+
+      try {
+          const res = await fetch(`${API_BASE_URL}/api/schedules?user_id=${currentUser.user_id}`);
+          if (!res.ok) throw new Error('Failed to load schedules');
+          const schedules = await res.json();
+
+          // Reset the weekData to prevent duplication on multiple loads
+          weekData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: [] };
+
+          schedules.forEach(sched => {
+              if (weekData[sched.day_of_week]) {
+                  weekData[sched.day_of_week].push({
+                      subject: sched.title,
+                      location: sched.location_id,
+                      location_name: sched.location_name,
+                      // MySQL TIME often returns HH:MM:SS format; we trim to HH:MM for input compatibility
+                      start: sched.start_time ? sched.start_time.substring(0, 5) : '',
+                      end: sched.end_time ? sched.end_time.substring(0, 5) : ''
+                  });
+              }
+          });
+          
+          // Force a re-render of the currently active view
+          if (!isEditMode && currentMode === 'schedule') {
+             renderTrack();
+          }
+      } catch (err) {
+          console.error("Error loading timetable during UI initialization:", err);
+      }
+  }
+
+  loadTimetable();
+
   const track = document.getElementById('schedule-track');
   const tabsContainer = document.getElementById('weekday-tabs');
   const editBtn = document.getElementById('edit-mode-btn');
@@ -202,11 +240,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="frame-body">
         <input type="text" class="frame-input subject-val" placeholder="Subject" value="${data.subject || ''}">
-        <select class="frame-input location-val">
-          <option value="" disabled ${!data.location ? 'selected' : ''}>Select Location...</option>
-          <option value="room_201" ${data.location === 'room_201' ? 'selected' : ''}>Room 201</option>
-          <option value="lab_3" ${data.location === 'lab_3' ? 'selected' : ''}>Computer Lab 3</option>
-        </select>
+        <div style="position: relative; width: 100%;">
+            <input type="text" class="frame-input location-search-input" placeholder="Search location..." value="${data.location_name || ''}">
+            <input type="hidden" class="location-id-input location-val" value="${data.location || ''}">
+            <ul class="location-suggestions" style="display:none; position:absolute; z-index: 100; background: #0f172a; border: 1px solid #334155; width: 100%; max-height: 150px; overflow-y: auto; list-style: none; padding: 0; margin: 0; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);"></ul>
+        </div>
         <div class="time-row">
           <input type="time" class="frame-input start-val" value="${data.start || ''}">
           <input type="time" class="frame-input end-val" value="${data.end || ''}">
@@ -217,8 +255,76 @@ document.addEventListener('DOMContentLoaded', () => {
     // Edit Mode Event Listeners
     card.querySelector('.delete').addEventListener('click', () => { card.remove(); });
     card.querySelector('.refresh').addEventListener('click', () => {
-      card.querySelectorAll('input, select').forEach(input => input.value = '');
+      card.querySelectorAll('input').forEach(input => input.value = '');
     });
+    
+    // Autocomplete Logic
+    const searchInput = card.querySelector('.location-search-input');
+    const idInput = card.querySelector('.location-id-input');
+    const suggestionsUl = card.querySelector('.location-suggestions');
+    let debounceTimer;
+
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        const query = e.target.value.trim();
+        // Clear hidden ID if user starts typing something new
+        idInput.value = '';
+
+        if (!query) {
+            suggestionsUl.style.display = 'none';
+            return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
+                if (!res.ok) throw new Error('Search failed');
+                const results = await res.json();
+                
+                suggestionsUl.innerHTML = '';
+                if (results.length === 0) {
+                    suggestionsUl.style.display = 'none';
+                    return;
+                }
+                
+                // Show top 2 results
+                const topResults = results.slice(0, 2);
+                topResults.forEach(item => {
+                    const li = document.createElement('li');
+                    li.style.padding = '8px 12px';
+                    li.style.cursor = 'pointer';
+                    li.style.borderBottom = '1px solid #1e293b';
+                    li.style.color = '#f8fafc';
+                    li.innerHTML = `<strong>${item.location_name}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${item.location_type})</span>`;
+                    
+                    li.addEventListener('mouseenter', () => { li.style.background = '#1e293b'; });
+                    li.addEventListener('mouseleave', () => { li.style.background = 'transparent'; });
+                    
+                    // Crucial: Click handling updates visible and hidden inputs
+                    li.addEventListener('click', () => {
+                        searchInput.value = item.location_name;
+                        idInput.value = item.location_id;
+                        suggestionsUl.style.display = 'none';
+                    });
+                    
+                    suggestionsUl.appendChild(li);
+                });
+                
+                suggestionsUl.style.display = 'block';
+
+            } catch (err) {
+                console.error("Autocomplete error:", err);
+            }
+        }, 300);
+    });
+
+    // Hide dropdown if clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !suggestionsUl.contains(e.target)) {
+            suggestionsUl.style.display = 'none';
+        }
+    });
+
     return card;
   }
 
@@ -231,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="frame-body">
         <span class="view-text"><strong>${data.subject}</strong></span>
-        <span class="view-text"><i class="fa-solid fa-location-dot"></i> ${data.location.replace('_', ' ')}</span>
+        <span class="view-text"><i class="fa-solid fa-location-dot"></i> ${data.location_name || 'Missing Location'}</span>
         <span class="view-time"><i class="fa-regular fa-clock"></i> ${data.start} - ${data.end}</span>
       </div>
     `;
@@ -301,9 +407,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.class-frame:not(.add-class-card)').forEach(card => {
       const subject = card.querySelector('.subject-val').value;
       if (subject) { // Only save if they typed a subject
+        const rawLoc = card.querySelector('.location-val').value;
+        const parsedLoc = parseInt(rawLoc, 10);
+        
         newClasses.push({
           subject: subject,
-          location: card.querySelector('.location-val').value,
+          location: isNaN(parsedLoc) ? "" : parsedLoc, // Int or ""
+          location_name: card.querySelector('.location-search-input').value,
           start: card.querySelector('.start-val').value,
           end: card.querySelector('.end-val').value
         });
@@ -337,8 +447,28 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTrack();
   });
 
-  saveBtn.addEventListener('click', () => {
+  saveBtn.addEventListener('click', async () => {
     saveCurrentInputsToState(); // Saves last focused tab to draftData
+    
+    // --- VALIDATION STEP ---
+    if (currentMode === 'schedule') {
+        let hasError = false;
+        for (const [day, classes] of Object.entries(draftData)) {
+            for (const cls of classes) {
+                if (!cls.location || !cls.start || !cls.end) {
+                    hasError = true;
+                    break;
+                }
+            }
+            if (hasError) break;
+        }
+
+        if (hasError) {
+            alert('Please fill all required fields (Location, Start Time, End Time) for your classes before saving.');
+            return; // Halt the entire save process
+        }
+    }
+    
     if (currentMode === 'schedule') {
         weekData = JSON.parse(JSON.stringify(draftData));
     } else {
@@ -348,9 +478,55 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTabs();
     renderTrack();
     
-    const outData = currentMode === 'schedule' ? weekData : eventData;
-    console.log("DATA READY FOR BACKEND API:", JSON.stringify(outData, null, 2));
-    alert("Saved successfully! Check Developer Console to see the JSON payload.");
+    // Handle saving Schedules to backend
+    if (currentMode === 'schedule') {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            alert('Cannot save: User is not logged in.');
+            return;
+        }
+        const currentUser = JSON.parse(userStr);
+
+        // Flatten the week object into an array with day_of_week
+        const flatSchedules = [];
+        for (const [day, classes] of Object.entries(weekData)) {
+            classes.forEach(cls => {
+                flatSchedules.push({
+                    day_of_week: day,
+                    title: cls.subject, // Map subject to title
+                    // Convert empty strings to null (as an extra safety measure)
+                    location_id: cls.location === "" ? null : cls.location,
+                    start_time: cls.start === "" ? null : cls.start,
+                    end_time: cls.end === "" ? null : cls.end
+                });
+            });
+        }
+
+        try {
+            saveBtn.textContent = 'Saving...';
+            const res = await fetch(`${API_BASE_URL}/api/schedules`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: currentUser.user_id,
+                    schedules: flatSchedules
+                })
+            });
+
+            if (!res.ok) throw new Error('Failed to save schedules');
+            
+            saveBtn.textContent = 'Save Changes';
+            console.log("Timetable saved to Database:", flatSchedules);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            saveBtn.textContent = 'Save Changes';
+            alert('An error occurred while saving the schedule.');
+        }
+    } else {
+        // Fallback for events (not mapped to DB in this prompt yet)
+        console.log("Events saved locally", eventData);
+    }
   });
 
   // 7. FAB LISTENERS

@@ -238,6 +238,9 @@ app.use('/api/auth', authRoutes);
 const profileRoutes = require('./routes/profile');
 app.use('/api/profile', profileRoutes);
 
+const scheduleRoutes = require('./routes/schedules');
+app.use('/api/schedules', scheduleRoutes);
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
