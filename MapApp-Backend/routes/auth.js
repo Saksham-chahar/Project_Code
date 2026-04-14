@@ -205,7 +205,7 @@ router.post('/login', async (req, res) => {
             return res.status(403).json({ message: 'Please verify your email before logging in.' });
         }
 
-        res.status(200).json({ message: 'Login successful', user: { full_name: user.full_name, email: user.email, user_type: user.user_type } });
+        res.status(200).json({ message: 'Login successful', user: { user_id: user.user_id, full_name: user.full_name, email: user.email, user_type: user.user_type } });
     } catch (err) {
         console.error('Database error during login:', err);
         res.status(500).json({ message: 'Database error' });

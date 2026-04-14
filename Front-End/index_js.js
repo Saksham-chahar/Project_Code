@@ -228,6 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'home.html';
                 } else {
                     const data = await response.json().catch(() => ({}));

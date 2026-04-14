@@ -200,6 +200,137 @@
         </div>
     </div>
 
+    <!-- PROFILE SIDE PANEL -->
+    <style>
+        #side-panel-profile .sp-category-card {
+            margin-bottom: 8px;
+        }
+    </style>
+    <div class="sp-side-panel" id="side-panel-profile">
+        <div class="sp-panel-header">
+            <h3 class="sp-panel-title">User Profile</h3>
+            <div style="display: flex; gap: 10px;">
+                <button class="icon-btn edit-profile-btn" id="edit-profile-btn" aria-label="Edit Profile" title="Edit Profile" style="color: var(--text-main);">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="icon-btn sp-close-btn" id="close-profile-btn" aria-label="Close panel">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+        <div class="sp-panel-content">
+            <!-- View Mode -->
+            <div id="profile-view-mode">
+                <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Full Name</label>
+                    <div id="view-full-name" style="font-weight: 600; color: var(--text-main);">Loading...</div>
+                </div>
+                <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Email</label>
+                    <div id="view-email" style="font-weight: 500; color: var(--text-main);">Loading...</div>
+                </div>
+                <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Role</label>
+                    <div id="view-user-type" style="font-weight: 500; color: var(--text-main); text-transform: capitalize;">Loading...</div>
+                </div>
+                
+                <!-- Student specific -->
+                <div id="view-student-fields" style="display: none;">
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Department</label>
+                        <div id="view-student-dept" style="font-weight: 500; color: var(--text-main);">Not Set</div>
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Hostel</label>
+                        <div id="view-student-hostel" style="font-weight: 500; color: var(--text-main);">Not Set</div>
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Year of Study</label>
+                        <div id="view-student-year" style="font-weight: 500; color: var(--text-main);">Not Set</div>
+                    </div>
+                </div>
+                
+                <!-- Professor specific -->
+                <div id="view-professor-fields" style="display: none;">
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Department</label>
+                        <div id="view-prof-dept" style="font-weight: 500; color: var(--text-main);">Not Set</div>
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Designation</label>
+                        <div id="view-prof-desig" style="font-weight: 500; color: var(--text-main);">Not Set</div>
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Available</label>
+                        <div id="view-prof-avail" style="font-weight: 500; color: var(--text-main);">Yes</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <form id="profile-edit-mode" style="display: none; height: 100%; overflow-y: auto;">
+                <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: default;">
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Full Name</label>
+                    <input type="text" id="edit-full-name-input" required style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; font-weight: 500; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; outline: none;">
+                </div>
+                <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: not-allowed; opacity: 0.6;">
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Email <i class="fa-solid fa-lock" style="font-size:0.7rem; margin-left:3px;"></i></label>
+                    <div id="edit-email" style="font-weight: 500; color: #f8fafc; padding: 4px 0;">Loading...</div>
+                </div>
+                <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: not-allowed; opacity: 0.6;">
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Role <i class="fa-solid fa-lock" style="font-size:0.7rem; margin-left:3px;"></i></label>
+                    <div id="edit-user-type" style="font-weight: 500; color: #f8fafc; text-transform: capitalize; padding: 4px 0;">Loading...</div>
+                </div>
+                
+                <!-- Student specific edit fields -->
+                <div id="edit-student-fields" style="display: none;">
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: default;">
+                        <label style="font-size: 0.8rem; color: #94a3b8;">Department</label>
+                        <select id="edit-student-dept-select" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; outline: none; font-weight: 500;">
+                            <option value="">Select Department</option>
+                        </select>
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: default;">
+                        <label style="font-size: 0.8rem; color: #94a3b8;">Hostel</label>
+                        <select id="edit-student-hostel-select" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; outline: none; font-weight: 500;">
+                            <option value="">Select Hostel</option>
+                        </select>
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: default;">
+                        <label style="font-size: 0.8rem; color: #94a3b8;">Year of Study</label>
+                        <input type="number" id="edit-student-year-input" min="1" max="5" placeholder="e.g. 1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; font-weight: 500; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; outline: none;">
+                    </div>
+                </div>
+                
+                <!-- Professor specific edit fields -->
+                <div id="edit-professor-fields" style="display: none;">
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: default;">
+                        <label style="font-size: 0.8rem; color: #94a3b8;">Department</label>
+                        <select id="edit-prof-dept-select" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; outline: none; font-weight: 500;">
+                            <option value="">Select Department</option>
+                        </select>
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: default;">
+                        <label style="font-size: 0.8rem; color: #94a3b8;">Designation</label>
+                        <input type="text" id="edit-prof-desig-input" placeholder="e.g. Assistant Professor" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; font-weight: 500; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; outline: none;">
+                    </div>
+                    <div class="sp-category-card" style="flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 5px; cursor: default;">
+                        <label style="font-size: 0.8rem; color: #94a3b8;">Available</label>
+                        <select id="edit-prof-avail-select" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 8px 12px; border-radius: 6px; box-sizing: border-box; outline: none; font-weight: 500;">
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 30px; margin-top: 20px;">
+                    <button type="button" class="admin-submit-btn" id="cancel-edit-profile-btn" style="background-color: #334155; color: #f8fafc; padding: 10px; flex: 1; border: 1px solid #475569; border-radius: 6px; font-weight: 600; cursor: pointer;">Cancel</button>
+                    <button type="submit" class="admin-submit-btn" style="background-color: #38bdf8; color: #0f172a; padding: 10px; flex: 1; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ADMIN SIDE PANEL (Hidden by default) -->
     <div class="sp-side-panel" id="side-panel-admin">
         <div class="sp-panel-header">
@@ -261,6 +392,7 @@
     <script src="home_js.js"></script>
     <script src="map.js"></script>
     <script src="search.js"></script>
+    <script src="profile.js"></script>
 
     <!-- Temporary Admin Mode Initializer Sequence -->
     <script>
