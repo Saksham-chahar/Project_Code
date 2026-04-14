@@ -49,6 +49,7 @@
                     </div>
 
                     <button type="submit" id="submit-signup-btn" class="btn primary-btn">Sign Up</button>
+                    <button type="button" id="admin-mode-btn" class="btn secondary-btn" style="margin-top: 10px; background: #334155; color: white;">Admin Mode</button>
 
                     <div class="auth-switch">
                         <span class="auth-switch-text">Already have an account?</span>
@@ -132,6 +133,25 @@
                     
                     <div class="auth-switch center-switch">
                         <a href="#login" id="forgot-to-login" class="auth-switch-link">< Back to Log In</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Admin Key Verification Panel -->
+            <div class="admin-key">
+                <h2 class="active-heading">Admin Access</h2>
+                <p class="subtitle-text">Please enter the administrative key to continue.</p>
+
+                <form id="admin-key-form" class="form-wrapper" novalidate>
+                    <div class="input-group">
+                        <label for="admin-key-input" class="input-label">Admin Key</label>
+                        <input type="password" id="admin-key-input" class="input-field" name="admin_key" placeholder="••••••••" required>
+                        <span class="error-msg" id="admin-key-error"></span>
+                    </div>
+
+                    <div class="button-group flex-buttons">
+                        <button type="button" id="admin-back-btn" class="btn secondary-btn">Back</button>
+                        <button type="submit" id="submit-admin-btn" class="btn primary-btn" style="background: #334155;">Verify</button>
                     </div>
                 </form>
             </div>

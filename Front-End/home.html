@@ -34,9 +34,8 @@
         <header class="top-nav-layer">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h1 class="app-logo">
-                    <i class="fa-solid fa-map-location-dot"></i> Map My Campus
+                     <i class="fa-solid fa-map-location-dot"></i> Map My Campus
                 </h1>
-                <button id="admin-mode-toggle" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:8px; cursor:pointer; font-size: 0.8rem; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Admin Mode</button>
             </div>
 
             <div class="search-panel">
@@ -394,25 +393,10 @@
     <script src="search.js"></script>
     <script src="profile.js"></script>
 
-    <!-- Temporary Admin Mode Initializer Sequence -->
+    <!-- Admin Mode Initializer Sequence -->
     <script>
-        const adminBtn = document.getElementById('admin-mode-toggle');
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'true';
-
-        if (adminBtn) {
-            adminBtn.addEventListener('click', () => {
-                if (isAdmin) {
-                    window.location.href = window.location.pathname; // Exit Admin
-                } else {
-                    window.location.href = window.location.pathname + '?admin=true'; // Enter Admin
-                }
-            });
-            if (isAdmin) {
-                adminBtn.textContent = "Exit Admin Mode";
-                adminBtn.style.background = "#334155";
-            }
-        }
 
         // Dynamically inject Admin CSS and JS if mode is active
         if (isAdmin) {

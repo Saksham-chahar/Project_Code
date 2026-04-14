@@ -70,7 +70,8 @@ body {
 .sign-up, 
 .verify-email, 
 .log-in,
-.forgot-password {
+.forgot-password,
+.admin-key {
     display: none;
     opacity: 0;
     transform: translateY(10px);

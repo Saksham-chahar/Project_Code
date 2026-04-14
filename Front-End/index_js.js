@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const verifyPanel = document.querySelector('.verify-email');
     const logInPanel = document.querySelector('.log-in');
     const forgotPanel = document.querySelector('.forgot-password');
+    const adminPanel = document.querySelector('.admin-key');
 
     // 2. Grab forms and buttons
     const linkToLogin = document.getElementById('link-to-login');
@@ -16,6 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const verifyForm = document.getElementById('verify-form');
     const loginForm = document.getElementById('login-form');
     const forgotForm = document.getElementById('forgot-form');
+    const adminKeyForm = document.getElementById('admin-key-form');
+    
+    const adminModeBtn = document.getElementById('admin-mode-btn');
+    const adminBackBtn = document.getElementById('admin-back-btn');
     
     const prevBtn = document.getElementById('prev-btn');
     const resendOtpBtn = document.getElementById('resend-otp-btn');
@@ -63,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Panel Switching ---
     function switchPanel(panelToShow) {
         clearAllErrors(); // Clear validation errors upon switching
-        [signUpPanel, verifyPanel, logInPanel, forgotPanel].forEach(panel => {
+        [signUpPanel, verifyPanel, logInPanel, forgotPanel, adminPanel].forEach(panel => {
             if (panel) panel.classList.remove('active');
         });
         if (panelToShow) panelToShow.classList.add('active');
@@ -79,6 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (forgotToLogin) forgotToLogin.addEventListener('click', (e) => { e.preventDefault(); switchPanel(logInPanel); });
     if (forgotToLoginBtn) forgotToLoginBtn.addEventListener('click', () => switchPanel(logInPanel));
     if (prevBtn) prevBtn.addEventListener('click', () => { clearInterval(otpTimerInterval); switchPanel(signUpPanel); });
+    if (adminModeBtn) adminModeBtn.addEventListener('click', () => switchPanel(adminPanel));
+    if (adminBackBtn) adminBackBtn.addEventListener('click', () => switchPanel(signUpPanel));
 
     // --- OTP Timer Logic ---
     function startOtpTimer(durationSeconds) {
@@ -280,6 +287,35 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Forgot Password Error:', error);
                 showError('forgot-email', 'Connection error. Please try again.');
+            }
+        });
+    }
+
+    // 5. Admin Key Verification
+    if (adminKeyForm) {
+        adminKeyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAllErrors();
+
+            const adminKey = document.getElementById('admin-key-input').value.trim();
+            if(!adminKey) { showError('admin-key-input', 'Admin key is required'); return; }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/verify-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ admin_key: adminKey })
+                });
+
+                if (response.ok) {
+                    window.location.href = 'home.html?admin=true';
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    showError('admin-key-input', data.message || 'Verification failed. Incorrect admin key.');
+                }
+            } catch (error) {
+                console.error('Admin verification error:', error);
+                showError('admin-key-input', 'Connection error. Check server.');
             }
         });
     }

@@ -263,4 +263,23 @@ router.post('/forgot-password', async (req, res) => {
     }
 });
 
-module.exports = router;
+// ─────────────────────────────────────────────────────────────
+// ROUTE 6: VERIFY ADMIN KEY
+// POST /api/auth/verify-admin
+// Body: { admin_key }
+// ─────────────────────────────────────────────────────────────
+router.post('/verify-admin', async (req, res) => {
+    const { admin_key } = req.body;
+
+    if (!admin_key) {
+        return res.status(400).json({ message: 'Admin key is required' });
+    }
+
+    if (admin_key === process.env.ADMIN_KEY) {
+        return res.status(200).json({ message: 'Admin verified successfully' });
+    } else {
+        return res.status(401).json({ message: 'Invalid admin key' });
+    }
+});
+
+module.exports = router;
