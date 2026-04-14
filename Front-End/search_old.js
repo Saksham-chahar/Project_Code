@@ -1,12 +1,3 @@
-// Extend Window interface for custom properties
-/**
- * @typedef {Object} WindowExtension
- * @property {any} myMap
- * @property {number[]} currentLocation
- * @property {any} destinationMarker
- * @property {any} maplibregl
- */
-
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('main-search-input');
     const searchResults = document.getElementById('search-results');
@@ -54,11 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.addEventListener('click', () => {
                         searchInput.value = loc.location_name;
                         searchResults.style.display = 'none';
-
                         drawRouteToTarget(loc.longitude, loc.latitude);
-
-                        // 👇 NEW: highlight polygon
-                        highlightLocationPolygon(loc);
                     });
                     
                     searchResults.appendChild(li);
@@ -74,16 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) {
         searchInput.addEventListener('input', debounce(handleSearch, 300));
     }
-
-    searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        const firstResult = searchResults.querySelector('li');
-
-        if (firstResult) {
-            firstResult.click(); // 👈 triggers BOTH route + polygon
-        }
-    }
-});
 
     // Hide dropdown when clicking outside
     document.addEventListener('click', (e) => {
@@ -162,56 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 coordinates = [[originLnt, originLat], [destLng, destLat]];
             }
 
-            // ================================
-            // 🔥 DOTTED LINE (user → road)
-            // ================================
-            // 🔥 CURVED PATH (adds a midpoint for smooth effect)
-const snappedRoadPoint = coordinates[0];
-
-// create slight curve using midpoint offset
-const midLng = (originLnt + snappedRoadPoint[0]) / 2;
-const midLat = (originLat + snappedRoadPoint[1]) / 2 + 0.00005; // tweak curve strength here
-
-const dottedGeoJSON = {
-    type: 'Feature',
-    geometry: {
-        type: 'LineString',
-        coordinates: [
-            [originLnt, originLat],
-            [midLng, midLat],        // 👈 curve point
-            snappedRoadPoint
-        ]
-    }
-};
-
-            // Remove old dotted line if exists
-            if (window.myMap.getSource('dotted-src')) {
-                window.myMap.removeLayer('dotted-layer');
-                window.myMap.removeSource('dotted-src');
-            }
-
-            // Add dotted line
-            window.myMap.addSource('dotted-src', {
-                type: 'geojson',
-                data: dottedGeoJSON
-            });
-
-            window.myMap.addLayer({
-                id: 'dotted-layer',
-                type: 'line',
-                source: 'dotted-src',
-                layout: {
-                    'line-cap': 'round',
-                    'line-join': 'round'
-                },
-                paint: {
-                    'line-color': '#2563eb',
-                    'line-width': 4,
-                    'line-dasharray': [0.5, 2]
-                }
-            });
-
-
             const geoJsonData = {
                 type: 'Feature',
                 properties: {},
@@ -287,68 +214,5 @@ const dottedGeoJSON = {
             console.error("Routing failed:", err);
             alert("Could not fetch directions. Note: Some Ola API configurations require POST on specific URLs, if this consistently fails consider falling back to drawn polylines.");
         }
-    }
-
-    function highlightLocationPolygon(loc) {
-        if (!loc.boundary) return; // no polygon
-        console.log("🔥 highlight function called", loc);
-        // 🔹 Convert WKT → GeoJSON
-        const raw = loc.boundary
-    .replace(/POLYGON\s*\(\(/i, '')
-    .replace(/\)\)/, '');
-
-let coordsText = raw.split(',').map(pair => {
-    const [lng, lat] = pair.trim().split(/\s+/).map(Number);
-    return [lng, lat];
-});
-
-// 🔥 Ensure polygon is closed
-if (
-    coordsText.length > 0 &&
-    (coordsText[0][0] !== coordsText[coordsText.length - 1][0] ||
-     coordsText[0][1] !== coordsText[coordsText.length - 1][1])
-) {
-    coordsText.push(coordsText[0]);
-}
-        const geoJSON = {
-            type: 'Feature',
-            geometry: {
-                type: 'Polygon',
-                coordinates: [coordsText]
-            }
-        };
-
-        // 🔹 Remove old highlight
-        if (window.myMap.getSource('highlight-src')) {
-            window.myMap.removeLayer('highlight-fill');
-            window.myMap.removeSource('highlight-src');
-        }
-
-        // 🔹 Floor color mapping (MATCH YOUR LEGEND)
-        const floorColors = {
-            0: '#60a5fa',  // ground
-            1: '#f97316',
-            2: '#ef4444',
-            3: '#ec4899',
-            4: '#8b5cf6'
-        };
-
-        const color = floorColors[loc.floor_no] || '#3b82f6';
-
-        // 🔹 Add polygon
-        window.myMap.addSource('highlight-src', {
-            type: 'geojson',
-            data: geoJSON
-        });
-
-        window.myMap.addLayer({
-            id: 'highlight-fill',
-            type: 'fill',
-            source: 'highlight-src',
-            paint: {
-                'fill-color': color,
-                'fill-opacity': 0.25 // 👈 transparent overlay
-            }
-        });
     }
 });
