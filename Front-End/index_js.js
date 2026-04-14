@@ -1,4 +1,7 @@
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    const API_BASE_URL = 'https://projectcode-production.up.railway.app';
     // 1. Grab all panels
     const signUpPanel = document.querySelector('.sign-up');
     const verifyPanel = document.querySelector('.verify-email');
@@ -152,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(!isValid) return;
 
             try {
-                const response = await fetch('http://localhost:5000/api/auth/register', {
+                const response = await fetch('${API_BASE_URL}/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ full_name: name, email, password, user_type: 'student' })
@@ -192,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+                const response = await fetch('${API_BASE_URL}/api/auth/verify-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: savedEmail, otp })
@@ -228,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(!isValid) return;
 
             try {
-                const response = await fetch('http://localhost:5000/api/auth/login', {
+                const response = await fetch('${API_BASE_URL}/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -267,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Adjust if a different endpoint exists for password reset requests
-                const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+                const response = await fetch('${API_BASE_URL}/api/auth/forgot-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -301,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(!adminKey) { showError('admin-key-input', 'Admin key is required'); return; }
 
             try {
-                const response = await fetch('http://localhost:5000/api/auth/verify-admin', {
+                const response = await fetch('${API_BASE_URL}/api/auth/verify-admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ admin_key: adminKey })
