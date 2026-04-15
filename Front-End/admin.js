@@ -111,7 +111,7 @@
             btn.disabled = true;
 
             // Use localhost to avoid local network IP changes causing timeouts
-            const API_BASE_URL = 'http://localhost:5000';
+            const API_BASE_URL = 'https://projectcode-production.up.railway.app';
             
             const res = await fetch(`${API_BASE_URL}/api/locations`, {
                 method: 'POST',
