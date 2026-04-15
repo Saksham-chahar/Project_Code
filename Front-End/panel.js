@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const endpoint = `http://localhost:5000/api/categories/${encodeURIComponent(categoryName.toLowerCase())}`;
+            const endpoint = `https://projectcode-production.up.railway.app/api/categories/${encodeURIComponent(categoryName.toLowerCase())}`;
                 
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error("Failed to fetch data from API.");
