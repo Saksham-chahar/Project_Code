@@ -9,27 +9,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewMode = document.getElementById('profile-view-mode');
     const editMode = document.getElementById('profile-edit-mode');
     
-    // View elements
     const viewFullName = document.getElementById('view-full-name');
     const viewEmail = document.getElementById('view-email');
     const viewUserType = document.getElementById('view-user-type');
     const viewStudentFields = document.getElementById('view-student-fields');
     const viewProfFields = document.getElementById('view-professor-fields');
     
-    // Edit elements
     const editStudentFields = document.getElementById('edit-student-fields');
     const editProfFields = document.getElementById('edit-professor-fields');
 
     let isEditMode = false;
-    let currentUser = window.loggedInUser || null;
+    let currentUser = null;
 
-    // Try reading cached user once
+    // Load cached user
     const userStr = localStorage.getItem('user');
     if (userStr) {
         currentUser = JSON.parse(userStr);
     }
 
-    // Load initial options
     fetchProfileOptions();
 
     if (profileBtn) {
@@ -40,10 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (closeProfileBtn) {
-        closeProfileBtn.addEventListener('click', closePanel);
-    }
-    
+    if (closeProfileBtn) closeProfileBtn.addEventListener('click', closePanel);
+
     if (globalOverlay) {
         globalOverlay.addEventListener('click', () => {
             if (profilePanel && profilePanel.classList.contains('sp-open')) {
@@ -65,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleMode();
         });
     }
-    
+
     const editForm = document.getElementById('profile-edit-mode');
     if (editForm) {
         editForm.addEventListener('submit', async (e) => {
@@ -83,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function toggleMode() {
         if (!viewMode || !editMode) return;
+
         if (isEditMode) {
             viewMode.style.display = 'none';
             editMode.style.display = 'block';
@@ -111,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateDropdown(selectId, items, valueKey, textKey) {
         const select = document.getElementById(selectId);
         if (!select) return;
-        // Keep the placeholder first option
+
         const placeholder = select.options[0];
         select.innerHTML = '';
         if (placeholder) select.appendChild(placeholder);
@@ -126,15 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadUserProfile() {
         const usrStr = localStorage.getItem('user');
+
         if (!usrStr) {
             if (viewFullName) viewFullName.textContent = 'Not logged in';
-            if (viewEmail) viewEmail.textContent = '-';
-            if (viewUserType) viewUserType.textContent = '-';
             return;
         }
 
         const userObj = JSON.parse(usrStr);
-        if (!userObj.user_id) {
+
+        // ✅ FIXED USER ID HANDLING
+        const userId = userObj.user_id || userObj.id;
+
+        if (!userId) {
             if (viewFullName) viewFullName.textContent = 'Missing User ID';
             return;
         }
@@ -142,18 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewFullName) viewFullName.textContent = 'Loading...';
 
         try {
-            const res = await fetch(`https://projectcode-production.up.railway.app/api/profile?user_id=${userObj.user_id}`);
+            const res = await fetch(`https://projectcode-production.up.railway.app/api/profile?user_id=${userId}`);
+
             if (res.ok) {
                 currentUser = await res.json();
-                // Ensure front-end has the ID stored accurately for saving
-                currentUser.user_id = userObj.user_id; 
+
+                // ✅ ensure correct ID stored
+                currentUser.user_id = userId;
+
                 populateView(currentUser);
                 populateEditFlow(currentUser);
             } else {
                 if (viewFullName) viewFullName.textContent = 'Error loading profile';
             }
         } catch (err) {
-            console.error('Failed to fetch profile:', err);
+            console.error('Profile fetch error:', err);
             if (viewFullName) viewFullName.textContent = 'Connection Error';
         }
     }
@@ -168,26 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (data.user_type === 'student') {
             if (viewStudentFields) viewStudentFields.style.display = 'block';
-            const deptEl = document.getElementById('view-student-dept');
-            if (deptEl) deptEl.textContent = data.dept_name || 'Not Set';
-            
-            const hostelEl = document.getElementById('view-student-hostel');
-            if (hostelEl) hostelEl.textContent = data.hostel_name || 'Not Set';
-            
-            const yearEl = document.getElementById('view-student-year');
-            if (yearEl) yearEl.textContent = data.year_of_study || 'Not Set';
-            
+            document.getElementById('view-student-dept').textContent = data.dept_name || 'Not Set';
+            document.getElementById('view-student-hostel').textContent = data.hostel_name || 'Not Set';
+            document.getElementById('view-student-year').textContent = data.year_of_study || 'Not Set';
         } else if (data.user_type === 'professor') {
             if (viewProfFields) viewProfFields.style.display = 'block';
-            
-            const deptEl = document.getElementById('view-prof-dept');
-            if (deptEl) deptEl.textContent = data.dept_name || 'Not Set';
-            
-            const desigEl = document.getElementById('view-prof-desig');
-            if (desigEl) desigEl.textContent = data.designation || 'Not Set';
-            
-            const availEl = document.getElementById('view-prof-avail');
-            if (availEl) availEl.textContent = data.is_available !== 0 ? 'Yes' : 'No';
+            document.getElementById('view-prof-dept').textContent = data.dept_name || 'Not Set';
+            document.getElementById('view-prof-desig').textContent = data.designation || 'Not Set';
+            document.getElementById('view-prof-avail').textContent = data.is_available !== 0 ? 'Yes' : 'No';
         }
     }
 
@@ -195,38 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editStudentFields) editStudentFields.style.display = 'none';
         if (editProfFields) editProfFields.style.display = 'none';
 
-        const nameInput = document.getElementById('edit-full-name-input');
-        if (nameInput) nameInput.value = data.full_name || '';
-
-        const emailText = document.getElementById('edit-email');
-        if (emailText) emailText.textContent = data.email || '';
-
-        const typeText = document.getElementById('edit-user-type');
-        if (typeText) typeText.textContent = data.user_type || 'Unknown';
+        document.getElementById('edit-full-name-input').value = data.full_name || '';
+        document.getElementById('edit-email').textContent = data.email || '';
+        document.getElementById('edit-user-type').textContent = data.user_type || 'Unknown';
 
         if (data.user_type === 'student') {
-            if (editStudentFields) editStudentFields.style.display = 'block';
-            
-            const deptSelect = document.getElementById('edit-student-dept-select');
-            if (deptSelect && data.dept_id) deptSelect.value = data.dept_id;
-            
-            const hostSelect = document.getElementById('edit-student-hostel-select');
-            if (hostSelect && data.host_id) hostSelect.value = data.host_id;
-            
-            const yearInput = document.getElementById('edit-student-year-input');
-            if (yearInput && data.year_of_study) yearInput.value = data.year_of_study;
-            
+            editStudentFields.style.display = 'block';
+            document.getElementById('edit-student-dept-select').value = data.dept_id || '';
+            document.getElementById('edit-student-hostel-select').value = data.host_id || '';
+            document.getElementById('edit-student-year-input').value = data.year_of_study || '';
         } else if (data.user_type === 'professor') {
-            if (editProfFields) editProfFields.style.display = 'block';
-            
-            const deptSelect = document.getElementById('edit-prof-dept-select');
-            if (deptSelect && data.dept_id) deptSelect.value = data.dept_id;
-            
-            const desigInput = document.getElementById('edit-prof-desig-input');
-            if (desigInput && data.designation) desigInput.value = data.designation;
-            
-            const availSelect = document.getElementById('edit-prof-avail-select');
-            if (availSelect) availSelect.value = data.is_available === 0 ? "0" : "1";
+            editProfFields.style.display = 'block';
+            document.getElementById('edit-prof-dept-select').value = data.dept_id || '';
+            document.getElementById('edit-prof-desig-input').value = data.designation || '';
+            document.getElementById('edit-prof-avail-select').value = data.is_available === 0 ? "0" : "1";
         }
     }
 
@@ -235,42 +207,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const payload = {
             user_id: currentUser.user_id,
-            user_type: currentUser.user_type
+            user_type: currentUser.user_type,
+            full_name: document.getElementById('edit-full-name-input').value
         };
-
-        const nameInput = document.getElementById('edit-full-name-input');
-        if (nameInput) payload.full_name = nameInput.value;
 
         if (payload.user_type === 'student') {
             payload.dept_id = document.getElementById('edit-student-dept-select').value;
             payload.host_id = document.getElementById('edit-student-hostel-select').value;
             payload.year_of_study = document.getElementById('edit-student-year-input').value;
-        } else if (payload.user_type === 'professor') {
+        } else {
             payload.dept_id = document.getElementById('edit-prof-dept-select').value;
             payload.designation = document.getElementById('edit-prof-desig-input').value;
             payload.is_available = parseInt(document.getElementById('edit-prof-avail-select').value, 10);
         }
 
         try {
-            const saveBtn = editForm.querySelector('button[type="submit"]');
-            if (saveBtn) {
-                saveBtn.textContent = 'Saving...';
-                saveBtn.disabled = true;
-            }
-
             const res = await fetch('https://projectcode-production.up.railway.app/api/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            if (saveBtn) {
-                saveBtn.textContent = 'Save';
-                saveBtn.disabled = false;
-            }
-
             if (res.ok) {
-                // Reload visual
                 await loadUserProfile();
                 isEditMode = false;
                 toggleMode();
