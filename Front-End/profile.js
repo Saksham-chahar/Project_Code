@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchProfileOptions() {
         try {
-            const res = await fetch('http://localhost:5000/api/profile/options');
+            const res = await fetch('https://projectcode-production.up.railway.app/api/profile/options');
             if (res.ok) {
                 const data = await res.json();
                 populateDropdown('edit-student-dept-select', data.departments, 'dept_id', 'dept_name');
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewFullName) viewFullName.textContent = 'Loading...';
 
         try {
-            const res = await fetch(`http://localhost:5000/api/profile?user_id=${userObj.user_id}`);
+            const res = await fetch(`https://projectcode-production.up.railway.app/api/profile?user_id=${userObj.user_id}`);
             if (res.ok) {
                 currentUser = await res.json();
                 // Ensure front-end has the ID stored accurately for saving
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtn.disabled = true;
             }
 
-            const res = await fetch('http://localhost:5000/api/profile', {
+            const res = await fetch('https://projectcode-production.up.railway.app/api/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
